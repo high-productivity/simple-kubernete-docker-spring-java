@@ -1,0 +1,50 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  labels:
+    app: example
+  name: example
+spec:
+  # A deployment's specification really only
+  # has a few useful options
+
+  # 1. How many copies of each pod do we want?
+  replicas: 1
+  # 3. Which pods are managed by this deployment?
+  selector:
+    # This must match the labels we set on the pod!
+    matchLabels:
+      app: example
+
+  # This template field is a regular pod configuration
+  # nested inside the deployment spec
+  template:
+    metadata:
+      labels:
+        app: example
+    spec:
+      containers:
+      - image: example:latest
+        name: example
+        imagePullPolicy: Never
+        ports:
+          - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: example-balancer
+  labels:
+    app: example
+spec:
+  externalIPs:
+    - 192.168.64.2
+  type: NodePort
+  ports:
+    - name: http
+      nodePort: 30475
+      port: 8081
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: example
